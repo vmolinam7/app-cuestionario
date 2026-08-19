@@ -73,23 +73,6 @@ Sistema web desarrollado en **Django 5** con soporte para evaluación dinámica 
 
 ---
 
-## ☁️ Despliegue en Vercel
-
-El proyecto incluye los archivos preconfigurados para Vercel:
-- `vercel.json`
-- `build_files.sh`
-
-### Pasos para desplegar:
-1. Sube tu código a un repositorio de **GitHub / GitLab**.
-2. Conecta tu cuenta en **Vercel** e importa el proyecto.
-3. En la sección **Environment Variables**, añade:
-   - `DEBUG` = `False`
-   - `DATABASE_URL` = `postgresql://neondb_owner:npg_Esjfu8kSR9Kx@ep-morning-hat-ayib960a.c-5.us-east-2.aws.neon.tech/neondb?sslmode=require`
-   - `SECRET_KEY` = `tu_clave_secreta_de_django`
-4. Haz clic en **Deploy**.
-
----
-
 ## 👨‍💻 Autor
 
 Desarrollado por **Victor Molina**
