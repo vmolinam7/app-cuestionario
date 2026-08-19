@@ -1,0 +1,96 @@
+{% extends 'base.html' %}
+
+{% block title %}Detalle de Evaluación #{{ intento.id }} - Admin{% endblock %}
+{% block container_class %}container-wide{% endblock %}
+
+{% block content %}
+<div style="margin-bottom: 1.5rem;">
+  <a href="{% url 'admin_dashboard' %}" class="btn btn-secondary btn-sm">
+    &larr; Volver al Panel de Administración
+  </a>
+</div>
+
+<div class="card">
+  <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem; border-bottom: 1px solid var(--border-color); padding-bottom: 1.5rem; margin-bottom: 1.5rem;">
+    <div>
+      <h1 class="card-title">Detalle de Evaluación #{{ intento.id }}</h1>
+      <p class="card-subtitle">
+        Realizada el {{ intento.fecha_completado|date:"d/m/Y a las H:i" }}
+      </p>
+    </div>
+
+    <div style="text-align: right;">
+      {% if intento.aprobado %}
+        <span class="badge badge-success" style="font-size: 0.85rem; padding: 0.3rem 0.8rem;">APROBADO</span>
+      {% else %}
+        <span class="badge badge-danger" style="font-size: 0.85rem; padding: 0.3rem 0.8rem;">REPROBADO</span>
+      {% endif %}
+      <div style="font-size: 1.25rem; font-weight: 800; margin-top: 0.25rem;">
+        {{ intento.puntaje }} / {{ intento.total_preguntas }} ({{ intento.porcentaje }}%)
+      </div>
+    </div>
+  </div>
+
+  <div style="background-color: var(--primary-light); padding: 1rem; border-radius: var(--radius-sm); margin-bottom: 1.5rem; border: 1px solid var(--border-color); display: flex; gap: 2rem; flex-wrap: wrap;">
+    <div>
+      <span style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">Conductor</span>
+      <div style="font-weight: 700; color: var(--text-main);">{{ participante.nombre_completo }}</div>
+    </div>
+    <div>
+      <span style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">Cédula / Identificación</span>
+      <div style="font-weight: 700; color: var(--text-main);">{{ participante.cedula }}</div>
+    </div>
+    <div>
+      <span style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">Fecha de Registro</span>
+      <div style="font-weight: 700; color: var(--text-main);">{{ participante.fecha_registro|date:"d/m/Y" }}</div>
+    </div>
+  </div>
+
+  <h2 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 1rem;">Respuestas Registradas</h2>
+
+  {% for item in respuestas %}
+    <div style="padding: 1rem; border: 1px solid var(--border-color); border-radius: var(--radius-sm); margin-bottom: 1rem; background-color: {% if item.es_correcta %}var(--success-bg){% else %}var(--danger-bg){% endif %};">
+      <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem;">
+        <div>
+          <span style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">
+            Pregunta {{ forloop.counter }} - {{ item.categoria }}
+          </span>
+          <p style="font-weight: 600; margin: 0.25rem 0 0.5rem 0; color: var(--text-main);">
+            {{ item.texto }}
+          </p>
+        </div>
+        {% if item.es_correcta %}
+          <span class="badge badge-success">Acertada</span>
+        {% else %}
+          <span class="badge badge-danger">Fallada</span>
+        {% endif %}
+      </div>
+
+      <div style="font-size: 0.875rem; margin-top: 0.5rem; display: flex; flex-direction: column; gap: 0.25rem;">
+        <div>
+          Respuesta seleccionada: 
+          <strong>
+            {{ item.opcion_seleccionada }}) 
+            {% if item.opcion_seleccionada == 'A' %}{{ item.opcion_a }}
+            {% elif item.opcion_seleccionada == 'B' %}{{ item.opcion_b }}
+            {% elif item.opcion_seleccionada == 'C' %}{{ item.opcion_c }}
+            {% elif item.opcion_seleccionada == 'D' %}{{ item.opcion_d }}
+            {% else %}No responde{% endif %}
+          </strong>
+        </div>
+
+        {% if not item.es_correcta %}
+          <div style="color: var(--success); font-weight: 600;">
+            Respuesta correcta: 
+            {{ item.opcion_correcta }}) 
+            {% if item.opcion_correcta == 'A' %}{{ item.opcion_a }}
+            {% elif item.opcion_correcta == 'B' %}{{ item.opcion_b }}
+            {% elif item.opcion_correcta == 'C' %}{{ item.opcion_c }}
+            {% elif item.opcion_correcta == 'D' %}{{ item.opcion_d }}{% endif %}
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  {% endfor %}
+</div>
+{% endblock %}

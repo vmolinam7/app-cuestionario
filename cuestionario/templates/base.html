@@ -1,0 +1,47 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Evaluación de Conocimiento para Conductores{% endblock %}</title>
+  <link rel="stylesheet" href="{% static 'css/style.css' %}">
+  {% block extra_head %}{% endblock %}
+</head>
+<body>
+
+  <nav class="navbar">
+    <a href="{% url 'inicio' %}" class="navbar-brand">
+      <span>Evaluación Conductores FP</span>
+    </a>
+    <div class="navbar-nav">
+      {% if user.is_authenticated and user.is_staff %}
+        <a href="{% url 'admin_dashboard' %}" class="nav-link">Panel Admin</a>
+        <a href="{% url 'admin_preguntas_list' %}" class="nav-link">Preguntas</a>
+        <a href="{% url 'admin_importar_excel' %}" class="nav-link">Importar Excel</a>
+        <a href="{% url 'admin_logout' %}" class="btn btn-secondary btn-sm">Cerrar Sesión</a>
+      {% else %}
+        <a href="{% url 'admin_login' %}" class="nav-link">Acceso Administrador</a>
+      {% endif %}
+    </div>
+  </nav>
+
+  <div class="container {% block container_class %}{% endblock %}">
+    {% if messages %}
+      {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">
+          {{ message }}
+        </div>
+      {% endfor %}
+    {% endif %}
+
+    {% block content %}{% endblock %}
+  </div>
+
+  <footer class="footer">
+    <p>&copy; {% now "Y" %} Evaluación de Conocimiento para Conductores FP. Desarrollado por Victor Molina.</p>
+  </footer>
+
+  {% block extra_script %}{% endblock %}
+</body>
+</html>

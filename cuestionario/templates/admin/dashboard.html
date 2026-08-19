@@ -1,0 +1,108 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard Administrador - Evaluación Conductores{% endblock %}
+{% block container_class %}container-wide{% endblock %}
+
+{% block content %}
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
+  <div>
+    <h1 style="font-size: 1.5rem; font-weight: 800; color: var(--text-main); margin: 0;">Panel de Administración</h1>
+    <p style="color: var(--text-muted); font-size: 0.9rem; margin-top: 0.2rem;">
+      Resultados de evaluaciones y gestión de cuestionarios
+    </p>
+  </div>
+  <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+    <a href="{% url 'admin_exportar_excel' %}" class="btn btn-primary btn-sm">
+      Exportar a Excel
+    </a>
+    <a href="{% url 'admin_importar_excel' %}" class="btn btn-secondary btn-sm">
+      Importar Excel
+    </a>
+    <a href="{% url 'admin_preguntas_list' %}" class="btn btn-secondary btn-sm">
+      Banco de Preguntas
+    </a>
+  </div>
+</div>
+
+<!-- Grid de Métricas Stats -->
+<div class="stats-grid">
+  <div class="stat-card">
+    <div class="stat-label">Total Evaluaciones</div>
+    <div class="stat-value">{{ total_evaluaciones }}</div>
+  </div>
+
+  <div class="stat-card">
+    <div class="stat-label">Participantes Únicos</div>
+    <div class="stat-value">{{ total_participantes }}</div>
+  </div>
+
+  <div class="stat-card">
+    <div class="stat-label">Tasa de Aprobación</div>
+    <div class="stat-value" style="color: var(--success);">{{ tasa_aprobacion }}%</div>
+  </div>
+
+  <div class="stat-card">
+    <div class="stat-label">Promedio General</div>
+    <div class="stat-value">{{ promedio_gral }}%</div>
+  </div>
+</div>
+
+<div class="card">
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 1rem;">
+    <h2 style="font-size: 1.1rem; font-weight: 700; margin: 0;">Historial de Evaluaciones</h2>
+
+    <form method="GET" action="{% url 'admin_dashboard' %}" style="display: flex; gap: 0.5rem; max-width: 350px; width: 100%;">
+      <input type="text" name="q" value="{{ query }}" class="form-control" placeholder="Buscar por Cédula o Nombre..." style="padding: 0.4rem 0.75rem; font-size: 0.85rem;">
+      <button type="submit" class="btn btn-secondary btn-sm">Buscar</button>
+      {% if query %}
+        <a href="{% url 'admin_dashboard' %}" class="btn btn-secondary btn-sm">Limpiar</a>
+      {% endif %}
+    </form>
+  </div>
+
+  {% if intentos %}
+    <div class="table-responsive">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Fecha y Hora</th>
+            <th>Cédula</th>
+            <th>Nombre Completo</th>
+            <th>Puntaje</th>
+            <th>Porcentaje</th>
+            <th>Estado</th>
+            <th>Acción</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for intento in intentos %}
+            <tr>
+              <td style="white-space: nowrap;">{{ intento.fecha_completado|date:"d/m/Y H:i" }}</td>
+              <td><strong>{{ intento.participante.cedula }}</strong></td>
+              <td>{{ intento.participante.nombre_completo }}</td>
+              <td>{{ intento.puntaje }} / {{ intento.total_preguntas }}</td>
+              <td>{{ intento.porcentaje }}%</td>
+              <td>
+                {% if intento.aprobado %}
+                  <span class="badge badge-success">Aprobado</span>
+                {% else %}
+                  <span class="badge badge-danger">Reprobado</span>
+                {% endif %}
+              </td>
+              <td>
+                <a href="{% url 'admin_intento_detalle' intento.id %}" class="btn btn-secondary btn-sm">
+                  Ver Detalle
+                </a>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <div style="text-align: center; padding: 2rem 0; color: var(--text-muted);">
+      <p>No se encontraron evaluaciones registradas.</p>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

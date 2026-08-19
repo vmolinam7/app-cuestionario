@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+
+{% block title %}Importar Preguntas desde Excel - Admin{% endblock %}
+
+{% block content %}
+<div style="margin-bottom: 1.5rem;">
+  <a href="{% url 'admin_dashboard' %}" class="btn btn-secondary btn-sm">
+    &larr; Volver al Panel de Administración
+  </a>
+</div>
+
+<div style="max-width: 600px; margin: 0 auto;">
+  <div class="card">
+    <div class="card-header">
+      <h1 class="card-title">Importar Cuestionario desde Excel</h1>
+      <p class="card-subtitle">Cargue un archivo `.xlsx` con preguntas y respuestas para actualizar el banco</p>
+    </div>
+
+    <form method="POST" action="{% url 'admin_importar_excel' %}" enctype="multipart/form-data">
+      {% csrf_token %}
+
+      <div class="form-group">
+        <label for="archivo_excel" class="form-label">Seleccionar archivo Excel (.xlsx) *</label>
+        <input type="file" id="archivo_excel" name="archivo_excel" class="form-control" accept=".xlsx" required>
+      </div>
+
+      <div style="background-color: var(--primary-light); padding: 1rem; border-radius: var(--radius-sm); margin-bottom: 1.5rem; border: 1px solid var(--border-color);">
+        <p style="font-size: 0.85rem; color: var(--text-main); margin-bottom: 0.5rem;">
+          <strong>Estructura esperada del archivo Excel:</strong>
+        </p>
+        <ul style="font-size: 0.8rem; color: var(--text-muted); padding-left: 1.25rem; margin: 0;">
+          <li>Columna A: Categoria</li>
+          <li>Columna B: Pregunta (Texto completo)</li>
+          <li>Columna C: Opcion_A</li>
+          <li>Columna D: Opcion_B</li>
+          <li>Columna E: Opcion_C</li>
+          <li>Columna F: Opcion_D</li>
+          <li>Columna G: Opcion_Correcta (Debe ser A, B, C o D)</li>
+        </ul>
+      </div>
+
+      <div style="display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap;">
+        <a href="{% url 'admin_descargar_plantilla' %}" class="btn btn-secondary btn-sm">
+          Descargar Plantilla de Ejemplo (.xlsx)
+        </a>
+        <button type="submit" class="btn btn-primary">
+          Cargar e Importar Preguntas
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

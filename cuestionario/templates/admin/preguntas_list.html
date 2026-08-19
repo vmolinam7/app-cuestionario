@@ -1,0 +1,133 @@
+{% extends 'base.html' %}
+
+{% block title %}Banco de Preguntas - Admin{% endblock %}
+{% block container_class %}container-wide{% endblock %}
+
+{% block content %}
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
+  <div>
+    <h1 style="font-size: 1.5rem; font-weight: 800; color: var(--text-main); margin: 0;">Banco de Preguntas</h1>
+    <p style="color: var(--text-muted); font-size: 0.9rem; margin-top: 0.2rem;">
+      Gestione y consulte el conjunto de preguntas activas para la evaluación aleatoria (Total: {{ preguntas.count }})
+    </p>
+  </div>
+  <div style="display: flex; gap: 0.5rem;">
+    <a href="{% url 'admin_dashboard' %}" class="btn btn-secondary btn-sm">
+      &larr; Volver al Dashboard
+    </a>
+    <a href="{% url 'admin_importar_excel' %}" class="btn btn-primary btn-sm">
+      Importar desde Excel
+    </a>
+  </div>
+</div>
+
+<!-- Formulario para Agregar Nueva Pregunta Manualmente -->
+<div class="card" style="margin-bottom: 2rem;">
+  <h2 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 1rem;">Agregar Nueva Pregunta al Banco</h2>
+  
+  <form method="POST" action="{% url 'admin_preguntas_list' %}">
+    {% csrf_token %}
+    <input type="hidden" name="action" value="crear">
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem;">
+      <div class="form-group">
+        <label class="form-label">Categoría / Módulo *</label>
+        <input type="text" name="categoria" class="form-control" placeholder="Ej. MANUAL OPERATIVO" required>
+      </div>
+
+      <div class="form-group" style="grid-column: span 2;">
+        <label class="form-label">Enunciado de la Pregunta *</label>
+        <input type="text" name="texto" class="form-control" placeholder="¿Qué debe verificar el conductor antes de salir?" required>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Opción A *</label>
+        <input type="text" name="opcion_a" class="form-control" required>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Opción B *</label>
+        <input type="text" name="opcion_b" class="form-control" required>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Opción C</label>
+        <input type="text" name="opcion_c" class="form-control">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Opción D</label>
+        <input type="text" name="opcion_d" class="form-control">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Opción Correcta *</label>
+        <select name="opcion_correcta" class="form-control" required>
+          <option value="A">Opción A</option>
+          <option value="B">Opción B</option>
+          <option value="C">Opción C</option>
+          <option value="D">Opción D</option>
+        </select>
+      </div>
+    </div>
+
+    <button type="submit" class="btn btn-primary btn-sm" style="margin-top: 0.5rem;">
+      Guardar Pregunta
+    </button>
+  </form>
+</div>
+
+<!-- Tabla de Preguntas -->
+<div class="card">
+  <h2 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 1rem;">Preguntas Registradas en el Pool</h2>
+
+  <div class="table-responsive">
+    <table class="table">
+      <thead>
+        <tr>
+          <th style="width: 50px;">#</th>
+          <th>Categoría</th>
+          <th>Pregunta</th>
+          <th style="width: 140px;">Respuesta Correcta</th>
+          <th style="width: 100px;">Estado</th>
+          <th style="width: 120px;">Acción</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for p in preguntas %}
+          <tr>
+            <td><strong>#{{ p.id }}</strong></td>
+            <td><span style="font-size: 0.8rem; color: var(--text-muted);">{{ p.categoria }}</span></td>
+            <td>
+              <div style="font-weight: 600;">{{ p.texto }}</div>
+              <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.25rem;">
+                A) {{ p.opcion_a }} | B) {{ p.opcion_b }} {% if p.opcion_c %}| C) {{ p.opcion_c }}{% endif %} {% if p.opcion_d %}| D) {{ p.opcion_d }}{% endif %}
+              </div>
+            </td>
+            <td>
+              <span class="badge badge-success">Opción {{ p.opcion_correcta }}</span>
+            </td>
+            <td>
+              {% if p.activa %}
+                <span class="badge badge-success">Activa</span>
+              {% else %}
+                <span class="badge badge-danger">Inactiva</span>
+              {% endif %}
+            </td>
+            <td>
+              <form method="POST" action="{% url 'admin_preguntas_list' %}" style="display: inline;">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="toggle">
+                <input type="hidden" name="pregunta_id" value="{{ p.id }}">
+                <button type="submit" class="btn btn-secondary btn-sm">
+                  {% if p.activa %}Desactivar{% else %}Activar{% endif %}
+                </button>
+              </form>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

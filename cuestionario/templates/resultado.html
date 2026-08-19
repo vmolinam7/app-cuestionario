@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+
+{% block title %}Resultado de la Evaluación{% endblock %}
+
+{% block content %}
+<div class="card" style="max-width: 600px; margin: 2rem auto;">
+  <div style="text-align: center; padding: 2rem 1rem;">
+    {% if intento.aprobado %}
+      <span class="badge badge-success" style="font-size: 0.9rem; padding: 0.5rem 1.25rem; margin-bottom: 1.25rem;">
+        ¡EVALUACIÓN APROBADA!
+      </span>
+      <h1 style="font-size: 3rem; font-weight: 800; color: var(--success); margin: 0.75rem 0 0.25rem 0;">
+        {{ intento.puntaje }} / {{ intento.total_preguntas }}
+      </h1>
+      <p style="color: var(--text-muted); font-size: 1.15rem; font-weight: 600;">
+        Calificación: {{ intento.porcentaje }}%
+      </p>
+    {% else %}
+      <span class="badge badge-danger" style="font-size: 0.9rem; padding: 0.5rem 1.25rem; margin-bottom: 1.25rem;">
+        EVALUACIÓN REPROBADA
+      </span>
+      <h1 style="font-size: 3rem; font-weight: 800; color: var(--danger); margin: 0.75rem 0 0.25rem 0;">
+        {{ intento.puntaje }} / {{ intento.total_preguntas }}
+      </h1>
+      <p style="color: var(--text-muted); font-size: 1.15rem; font-weight: 600;">
+        Calificación: {{ intento.porcentaje }}% (Mínimo requerido: 70%)
+      </p>
+    {% endif %}
+
+    <div style="background-color: var(--primary-light); border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 1.25rem; margin: 1.75rem 0 1.5rem 0; text-align: left;">
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; font-size: 0.9rem;">
+        <div>
+          <span style="font-size: 0.75rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase; display: block;">Conductor</span>
+          <strong style="color: var(--text-main);">{{ participante.nombre_completo }}</strong>
+        </div>
+        <div>
+          <span style="font-size: 0.75rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase; display: block;">Cédula / Identificación</span>
+          <strong style="color: var(--text-main);">{{ participante.cedula }}</strong>
+        </div>
+        <div style="grid-column: span 2;">
+          <span style="font-size: 0.75rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase; display: block;">Fecha de Realización</span>
+          <strong style="color: var(--text-main);">{{ intento.fecha_completado|date:"d/m/Y a las H:i" }}</strong>
+        </div>
+      </div>
+    </div>
+
+    <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1.5rem;">
+      Su evaluación ha sido registrada de forma permanente en la base de datos de administración.
+    </p>
+
+    <a href="{% url 'inicio' %}" class="btn btn-secondary" style="padding: 0.625rem 1.5rem;">
+      Volver al Inicio
+    </a>
+  </div>
+</div>
+{% endblock %}

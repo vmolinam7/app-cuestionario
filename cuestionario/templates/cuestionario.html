@@ -1,0 +1,171 @@
+{% extends 'base.html' %}
+
+{% block title %}Cuestionario de Evaluación{% endblock %}
+
+{% block content %}
+<div class="card">
+  <!-- Encabezado del Cuestionario -->
+  <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
+    <div>
+      <h1 class="card-title">Cuestionario de Evaluación</h1>
+      <p class="card-subtitle">
+        Conductor: <strong>{{ participante.nombre_completo }}</strong> (C.I: {{ participante.cedula }})
+      </p>
+    </div>
+    <span class="badge badge-neutral" id="stepCounterBadge">Pregunta 1 de {{ total_preguntas }}</span>
+  </div>
+
+  <!-- Barra de Progreso Elegante -->
+  <div style="width: 100%; background-color: var(--border-color); height: 8px; border-radius: 4px; overflow: hidden; margin-bottom: 1.5rem;">
+    <div id="progressBar" style="width: 14.28%; background-color: var(--primary); height: 100%; transition: width 0.3s ease;"></div>
+  </div>
+
+  <form method="POST" action="{% url 'cuestionario_evaluacion' %}" id="quizForm">
+    {% csrf_token %}
+
+    {% for p in preguntas %}
+      <div class="quiz-step" id="step-{{ forloop.counter }}" data-step="{{ forloop.counter }}" style="{% if not forloop.first %}display: none;{% endif %}">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+          <span class="question-number">Pregunta {{ forloop.counter }} de {{ total_preguntas }}</span>
+          <span style="font-size: 0.75rem; color: var(--text-muted); background: var(--primary-light); padding: 0.15rem 0.5rem; border-radius: 4px;">
+            {{ p.categoria }}
+          </span>
+        </div>
+
+        <h3 class="question-text" style="font-size: 1.15rem; margin-bottom: 1.25rem;">{{ p.texto }}</h3>
+
+        <div class="options-group">
+          <label class="option-label">
+            <input type="radio" name="pregunta_{{ p.id }}" value="A" required>
+            <span class="option-text"><strong>A)</strong> {{ p.opcion_a }}</span>
+          </label>
+
+          <label class="option-label">
+            <input type="radio" name="pregunta_{{ p.id }}" value="B" required>
+            <span class="option-text"><strong>B)</strong> {{ p.opcion_b }}</span>
+          </label>
+
+          {% if p.opcion_c %}
+          <label class="option-label">
+            <input type="radio" name="pregunta_{{ p.id }}" value="C" required>
+            <span class="option-text"><strong>C)</strong> {{ p.opcion_c }}</span>
+          </label>
+          {% endif %}
+
+          {% if p.opcion_d %}
+          <label class="option-label">
+            <input type="radio" name="pregunta_{{ p.id }}" value="D" required>
+            <span class="option-text"><strong>D)</strong> {{ p.opcion_d }}</span>
+          </label>
+          {% endif %}
+        </div>
+      </div>
+    {% endfor %}
+
+    <!-- Alerta de selección requerida -->
+    <div id="selectionWarning" class="alert alert-warning" style="display: none; margin-top: 1.25rem; font-size: 0.85rem;">
+      Por favor seleccione una opción de respuesta para continuar.
+    </div>
+
+    <!-- Controles de Navegación Paso a Paso -->
+    <div style="margin-top: 2rem; padding-top: 1rem; border-top: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center;">
+      <button type="button" id="btnPrev" class="btn btn-secondary" style="visibility: hidden;">
+        &larr; Anterior
+      </button>
+
+      <button type="button" id="btnNext" class="btn btn-primary">
+        Siguiente &rarr;
+      </button>
+
+      <button type="submit" id="btnSubmit" class="btn btn-primary" style="display: none; padding: 0.75rem 2rem;">
+        Finalizar y Enviar Respuestas
+      </button>
+    </div>
+  </form>
+</div>
+{% endblock %}
+
+{% block extra_script %}
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const totalSteps = {{ total_preguntas }};
+    let currentStep = 1;
+
+    const btnPrev = document.getElementById('btnPrev');
+    const btnNext = document.getElementById('btnNext');
+    const btnSubmit = document.getElementById('btnSubmit');
+    const progressBar = document.getElementById('progressBar');
+    const stepCounterBadge = document.getElementById('stepCounterBadge');
+    const selectionWarning = document.getElementById('selectionWarning');
+
+    function updateStep(step) {
+      // Ocultar todos los pasos
+      for (let i = 1; i <= totalSteps; i++) {
+        const stepEl = document.getElementById('step-' + i);
+        if (stepEl) {
+          stepEl.style.display = (i === step) ? 'block' : 'none';
+        }
+      }
+
+      // Ocultar alerta de advertencia
+      selectionWarning.style.display = 'none';
+
+      // Actualizar contador e indicador de progreso
+      stepCounterBadge.textContent = `Pregunta ${step} de ${totalSteps}`;
+      const percentage = (step / totalSteps) * 100;
+      progressBar.style.width = percentage + '%';
+
+      // Botón Anterior
+      if (step === 1) {
+        btnPrev.style.visibility = 'hidden';
+      } else {
+        btnPrev.style.visibility = 'visible';
+      }
+
+      // Botón Siguiente / Finalizar
+      if (step === totalSteps) {
+        btnNext.style.display = 'none';
+        btnSubmit.style.display = 'inline-flex';
+      } else {
+        btnNext.style.display = 'inline-flex';
+        btnSubmit.style.display = 'none';
+      }
+    }
+
+    function isCurrentStepAnswered() {
+      const currentStepEl = document.getElementById('step-' + currentStep);
+      if (!currentStepEl) return true;
+      const radios = currentStepEl.querySelectorAll('input[type="radio"]');
+      for (let r of radios) {
+        if (r.checked) return true;
+      }
+      return false;
+    }
+
+    btnNext.addEventListener('click', function() {
+      if (!isCurrentStepAnswered()) {
+        selectionWarning.style.display = 'block';
+        return;
+      }
+      if (currentStep < totalSteps) {
+        currentStep++;
+        updateStep(currentStep);
+      }
+    });
+
+    btnPrev.addEventListener('click', function() {
+      if (currentStep > 1) {
+        currentStep--;
+        updateStep(currentStep);
+      }
+    });
+
+    document.getElementById('quizForm').addEventListener('submit', function(e) {
+      if (!isCurrentStepAnswered()) {
+        e.preventDefault();
+        selectionWarning.style.display = 'block';
+      }
+    });
+  });
+</script>
+{% endblock %}
